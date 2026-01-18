@@ -20,6 +20,7 @@ public class ForgeCli {
             System.out.println("1) List courses");
             System.out.println("2) Add course");
             System.out.println("3) Delete course");
+            System.out.println("4) Manage topics for a course");
             System.out.println("0) Save & Exit");
             System.out.print("> ");
 
@@ -29,6 +30,7 @@ public class ForgeCli {
                 case "1" -> listCourses();
                 case "2" -> addCourse();
                 case "3" -> deleteCourse();
+                case "4" -> manageTopics();
                 case "0" -> { return; }
                 default -> System.out.println("Invalid choice.");
             }
@@ -75,5 +77,69 @@ public class ForgeCli {
         } catch (NumberFormatException e) {
             System.out.println("Please enter a number.");
         }
+    }
+    private void manageTopics() {
+        Course course = pickCourse();
+        if (course == null) return;
+
+        while (true) {
+            System.out.println();
+            System.out.println("=== TOPICS for " + course.getName() + " ===");
+            System.out.println("1) List topics");
+            System.out.println("2) Add topic");
+            System.out.println("0) Back");
+            System.out.print("> ");
+
+            String choice = scanner.nextLine().trim();
+            switch (choice) {
+                case "1" -> listTopics(course);
+                case "2" -> addTopic(course);
+                case "0" -> { return; }
+                default -> System.out.println("Invalid choice.");
+            }
+        }
+    }
+
+    private Course pickCourse() {
+        listCourses();
+        if (data.getCourses().isEmpty()) return null;
+
+        System.out.print("Select course number: ");
+        String raw = scanner.nextLine().trim();
+
+        try {
+            int idx = Integer.parseInt(raw) - 1;
+            if (idx < 0 || idx >= data.getCourses().size()) {
+                System.out.println("Out of range.");
+                return null;
+            }
+            return data.getCourses().get(idx);
+        } catch (NumberFormatException e) {
+            System.out.println("Please enter a number.");
+            return null;
+        }
+    }
+
+    private void listTopics(Course course) {
+        if (course.getTopics().isEmpty()) {
+            System.out.println("No topics yet.");
+            return;
+        }
+        for (int i = 0; i < course.getTopics().size(); i++) {
+            var t = course.getTopics().get(i);
+            String last = (t.getLastStudied() == null) ? "never" : t.getLastStudied().toString();
+            System.out.println((i + 1) + ") " + t.getName() + " (lastStudied: " + last + ")");
+        }
+    }
+
+    private void addTopic(Course course) {
+        System.out.print("Topic name (e.g., Topic 1): ");
+        String name = scanner.nextLine().trim();
+        if (name.isEmpty()) {
+            System.out.println("Name can't be empty.");
+            return;
+        }
+        course.addTopic(new com.forge.model.Topic(name));
+        System.out.println("Added topic: " + name);
     }
 }
