@@ -22,6 +22,7 @@ public class ForgeCli {
             System.out.println("3) Delete course");
             System.out.println("4) Manage topics for a course");
             System.out.println("5) Log study session");
+            System.out.println("6) Deadlines");
             System.out.println("0) Save & Exit");
             System.out.print("> ");
 
@@ -33,6 +34,7 @@ public class ForgeCli {
                 case "3" -> deleteCourse();
                 case "4" -> manageTopics();
                 case "5" -> logStudySession();
+                case "6" -> deadlinesMenu();
                 case "0" -> {
                     return;
                 }
@@ -220,5 +222,96 @@ public class ForgeCli {
         topic.setLastStudied(date);
 
         System.out.println("Logged " + mins + " min for " + course.getName() + " — " + topic.getName());
+    }
+    private void deadlinesMenu() {
+        while (true) {
+            System.out.println();
+            System.out.println("=== DEADLINES ===");
+            System.out.println("1) List deadlines");
+            System.out.println("2) Add deadline");
+            System.out.println("0) Back");
+            System.out.print("> ");
+
+            String choice = scanner.nextLine().trim();
+            switch (choice) {
+                case "1" -> listDeadlines();
+                case "2" -> addDeadline();
+                case "0" -> { return; }
+                default -> System.out.println("Invalid choice.");
+            }
+        }
+    }
+
+    private void listDeadlines() {
+        if (data.getDeadlines().isEmpty()) {
+            System.out.println("No deadlines yet.");
+            return;
+        }
+
+        data.getDeadlines().stream()
+                .sorted((a, b) -> a.getDueDate().compareTo(b.getDueDate()))
+                .forEach(d -> {
+                    String courseName = findCourseName(d.getCourseId());
+                    String weight = (d.getWeight() == null) ? "-" : d.getWeight().toString();
+                    System.out.println(d.getDueDate() + " | " + d.getType() + " | " + courseName + " | " + d.getTitle() + " | weight: " + weight);
+                });
+    }
+
+    private void addDeadline() {
+        Course course = pickCourse();
+        if (course == null) return;
+
+        System.out.print("Type (ASSIGNMENT/QUIZ/EXAM): ");
+        String typeRaw = scanner.nextLine().trim().toUpperCase();
+
+        com.forge.model.Deadline.Type type;
+        try {
+            type = com.forge.model.Deadline.Type.valueOf(typeRaw);
+        } catch (Exception e) {
+            System.out.println("Invalid type.");
+            return;
+        }
+
+        System.out.print("Title (e.g., Quiz 1): ");
+        String title = scanner.nextLine().trim();
+        if (title.isEmpty()) {
+            System.out.println("Title can't be empty.");
+            return;
+        }
+
+        System.out.print("Due date (YYYY-MM-DD): ");
+        String dueRaw = scanner.nextLine().trim();
+
+        java.time.LocalDate due;
+        try {
+            due = java.time.LocalDate.parse(dueRaw);
+        } catch (Exception e) {
+            System.out.println("Invalid date format.");
+            return;
+        }
+
+        System.out.print("Weight (optional, blank if none): ");
+        String wRaw = scanner.nextLine().trim();
+        Double weight = null;
+        if (!wRaw.isEmpty()) {
+            try {
+                weight = Double.parseDouble(wRaw);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid weight.");
+                return;
+            }
+        }
+
+        com.forge.model.Deadline d = new com.forge.model.Deadline(type, course.getId(), title, due, weight);
+        data.getDeadlines().add(d);
+
+        System.out.println("Added deadline: " + title + " (" + due + ")");
+    }
+
+    private String findCourseName(String courseId) {
+        for (Course c : data.getCourses()) {
+            if (c.getId().equals(courseId)) return c.getName();
+        }
+        return "(unknown course)";
     }
 }
