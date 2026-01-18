@@ -14,3 +14,6 @@ dependencies {
 application {
     mainClass.set("com.forge.App")
 }
+tasks.named<JavaExec>("run") {
+    standardInput = System.`in`
+}
