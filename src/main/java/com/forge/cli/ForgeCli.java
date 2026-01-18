@@ -23,6 +23,7 @@ public class ForgeCli {
             System.out.println("4) Manage topics for a course");
             System.out.println("5) Log study session");
             System.out.println("6) Deadlines");
+            System.out.println("7) Dashboard");
             System.out.println("0) Save & Exit");
             System.out.print("> ");
 
@@ -35,6 +36,7 @@ public class ForgeCli {
                 case "4" -> manageTopics();
                 case "5" -> logStudySession();
                 case "6" -> deadlinesMenu();
+                case "7" -> showDashboard();
                 case "0" -> {
                     return;
                 }
@@ -313,5 +315,82 @@ public class ForgeCli {
             if (c.getId().equals(courseId)) return c.getName();
         }
         return "(unknown course)";
+    }
+    private void showDashboard() {
+        System.out.println();
+        System.out.println("=== DASHBOARD ===");
+
+        printWhatToStudyToday();
+        System.out.println();
+        printWeeklyTarget();
+    }
+
+    private void printWhatToStudyToday() {
+        System.out.println("-- What to study today --");
+
+        if (data.getCourses().isEmpty()) {
+            System.out.println("No courses yet.");
+            return;
+        }
+
+        for (Course course : data.getCourses()) {
+            if (course.getTopics().isEmpty()) {
+                System.out.println(course.getName() + ": (no topics yet)");
+                continue;
+            }
+
+            com.forge.model.Topic best = null;
+
+            for (com.forge.model.Topic t : course.getTopics()) {
+                if (best == null) {
+                    best = t;
+                    continue;
+                }
+
+                // Prefer never-studied topics
+                if (best.getLastStudied() != null && t.getLastStudied() == null) {
+                    best = t;
+                    continue;
+                }
+
+                // If both have dates, pick the oldest date
+                if (best.getLastStudied() != null && t.getLastStudied() != null) {
+                    if (t.getLastStudied().isBefore(best.getLastStudied())) {
+                        best = t;
+                    }
+                }
+
+                // If best is never-studied, keep it (never-studied already wins)
+            }
+
+            String last = (best.getLastStudied() == null) ? "never" : best.getLastStudied().toString();
+            System.out.println(course.getName() + " -> " + best.getName() + " (lastStudied: " + last + ")");
+        }
+    }
+
+    private void printWeeklyTarget() {
+        System.out.println("-- This week's target (>= 1 topic per course) --");
+
+        if (data.getCourses().isEmpty()) {
+            System.out.println("No courses yet.");
+            return;
+        }
+
+        java.time.LocalDate today = java.time.LocalDate.now();
+        java.time.LocalDate monday = today.minusDays(today.getDayOfWeek().getValue() - 1);
+
+        for (Course course : data.getCourses()) {
+            boolean studiedThisWeek = data.getStudySessions().stream()
+                    .anyMatch(s ->
+                            s.getCourseId().equals(course.getId())
+                                    && !s.getDate().isBefore(monday)
+                                    && !s.getDate().isAfter(today)
+                    );
+
+            String mark = studiedThisWeek ? "✅" : "❌";
+            System.out.println(mark + " " + course.getName());
+        }
+
+        System.out.println("Week window: " + monday + " -> " + today);
     }
 }
