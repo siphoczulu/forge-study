@@ -21,6 +21,7 @@ public class ForgeCli {
             System.out.println("2) Add course");
             System.out.println("3) Delete course");
             System.out.println("4) Manage topics for a course");
+            System.out.println("5) Log study session");
             System.out.println("0) Save & Exit");
             System.out.print("> ");
 
@@ -31,7 +32,10 @@ public class ForgeCli {
                 case "2" -> addCourse();
                 case "3" -> deleteCourse();
                 case "4" -> manageTopics();
-                case "0" -> { return; }
+                case "5" -> logStudySession();
+                case "0" -> {
+                    return;
+                }
                 default -> System.out.println("Invalid choice.");
             }
         }
@@ -78,6 +82,7 @@ public class ForgeCli {
             System.out.println("Please enter a number.");
         }
     }
+
     private void manageTopics() {
         Course course = pickCourse();
         if (course == null) return;
@@ -94,7 +99,9 @@ public class ForgeCli {
             switch (choice) {
                 case "1" -> listTopics(course);
                 case "2" -> addTopic(course);
-                case "0" -> { return; }
+                case "0" -> {
+                    return;
+                }
                 default -> System.out.println("Invalid choice.");
             }
         }
@@ -141,5 +148,77 @@ public class ForgeCli {
         }
         course.addTopic(new com.forge.model.Topic(name));
         System.out.println("Added topic: " + name);
+    }
+
+    private void logStudySession() {
+        Course course = pickCourse();
+        if (course == null) return;
+
+        if (course.getTopics().isEmpty()) {
+            System.out.println("This course has no topics yet. Add topics first.");
+            return;
+        }
+
+        // pick topic
+        listTopics(course);
+        System.out.print("Select topic number: ");
+        String raw = scanner.nextLine().trim();
+
+        int topicIdx;
+        try {
+            topicIdx = Integer.parseInt(raw) - 1;
+            if (topicIdx < 0 || topicIdx >= course.getTopics().size()) {
+                System.out.println("Out of range.");
+                return;
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Please enter a number.");
+            return;
+        }
+
+        var topic = course.getTopics().get(topicIdx);
+
+        // date (default today)
+        java.time.LocalDate date = java.time.LocalDate.now();
+        System.out.print("Date (YYYY-MM-DD) or blank for today: ");
+        String dateRaw = scanner.nextLine().trim();
+        if (!dateRaw.isEmpty()) {
+            try {
+                date = java.time.LocalDate.parse(dateRaw);
+            } catch (Exception e) {
+                System.out.println("Invalid date format.");
+                return;
+            }
+        }
+
+        // duration
+        System.out.print("Duration minutes: ");
+        String durRaw = scanner.nextLine().trim();
+        int mins;
+        try {
+            mins = Integer.parseInt(durRaw);
+            if (mins <= 0) {
+                System.out.println("Minutes must be > 0.");
+                return;
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Please enter a number.");
+            return;
+        }
+
+        // notes
+        System.out.print("Notes (optional): ");
+        String notes = scanner.nextLine();
+
+        // create session
+        com.forge.model.StudySession session =
+                new com.forge.model.StudySession(date, course.getId(), topic.getId(), mins, notes);
+
+        data.getStudySessions().add(session);
+
+        // update lastStudied
+        topic.setLastStudied(date);
+
+        System.out.println("Logged " + mins + " min for " + course.getName() + " — " + topic.getName());
     }
 }
