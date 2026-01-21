@@ -1,5 +1,8 @@
+import org.gradle.api.tasks.JavaExec
+
 plugins {
     application
+    id("org.openjfx.javafxplugin") version "0.1.0"
 }
 
 repositories {
@@ -11,9 +14,15 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.2")
 }
 
-application {
-    mainClass.set("com.forge.App")
+javafx {
+    version = "25.0.2"
+    modules = listOf("javafx.controls")
 }
+
+application {
+    mainClass.set("com.forge.fx.ForgeFxApp")
+}
+
 tasks.named<JavaExec>("run") {
     standardInput = System.`in`
 }

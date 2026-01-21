@@ -24,6 +24,7 @@ public class ForgeCli {
             System.out.println("5) Log study session");
             System.out.println("6) Deadlines");
             System.out.println("7) Dashboard");
+            System.out.println("9) Generate sample data (overwrite)");
             System.out.println("0) Save & Exit");
             System.out.print("> ");
 
@@ -37,6 +38,7 @@ public class ForgeCli {
                 case "5" -> logStudySession();
                 case "6" -> deadlinesMenu();
                 case "7" -> showDashboard();
+                case "9" -> generateSampleData();
                 case "0" -> {
                     return;
                 }
@@ -392,5 +394,51 @@ public class ForgeCli {
         }
 
         System.out.println("Week window: " + monday + " -> " + today);
+    }
+    private void generateSampleData() {
+        System.out.print("This will overwrite ALL current data. Type YES to continue: ");
+        String confirm = scanner.nextLine().trim();
+        if (!confirm.equals("YES")) {
+            System.out.println("Cancelled.");
+            return;
+        }
+
+        // wipe
+        data.getCourses().clear();
+        data.getStudySessions().clear();
+        data.getDeadlines().clear();
+
+        // courses
+        Course physics = new Course("Physics 2");
+        physics.addTopic(new com.forge.model.Topic("Topic 1"));
+        physics.addTopic(new com.forge.model.Topic("Topic 2"));
+        physics.addTopic(new com.forge.model.Topic("Topic 3"));
+
+        Course calculus = new Course("Calculus 2");
+        calculus.addTopic(new com.forge.model.Topic("Topic 1"));
+        calculus.addTopic(new com.forge.model.Topic("Topic 2"));
+
+        data.getCourses().add(physics);
+        data.getCourses().add(calculus);
+
+        // one study session this week (so you see ✅)
+        java.time.LocalDate today = java.time.LocalDate.now();
+        var t1 = physics.getTopics().get(0);
+        t1.setLastStudied(today.minusDays(2));
+        data.getStudySessions().add(
+                new com.forge.model.StudySession(today.minusDays(2), physics.getId(), t1.getId(), 50, "Sample: practice problems")
+        );
+
+        // deadlines
+        data.getDeadlines().add(new com.forge.model.Deadline(
+                com.forge.model.Deadline.Type.QUIZ, calculus.getId(), "Quiz 1",
+                today.plusDays(3), 10.0
+        ));
+        data.getDeadlines().add(new com.forge.model.Deadline(
+                com.forge.model.Deadline.Type.EXAM, physics.getId(), "Midterm",
+                today.plusDays(12), 30.0
+        ));
+
+        System.out.println("Sample data generated.");
     }
 }
