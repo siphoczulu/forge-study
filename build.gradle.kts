@@ -26,3 +26,10 @@ application {
 tasks.named<JavaExec>("run") {
     standardInput = System.`in`
 }
+tasks.register<JavaExec>("runCli") {
+    group = "application"
+    description = "Run Forge CLI (v0.1)"
+    classpath = sourceSets["main"].runtimeClasspath
+    mainClass.set("com.forge.App")
+    standardInput = System.`in`
+}
