@@ -362,7 +362,6 @@ public class ForgeCli {
                     }
                 }
 
-                // If best is never-studied, keep it (never-studied already wins)
             }
 
             String last = (best.getLastStudied() == null) ? "never" : best.getLastStudied().toString();
@@ -421,7 +420,6 @@ public class ForgeCli {
         data.getCourses().add(physics);
         data.getCourses().add(calculus);
 
-        // one study session this week (so you see ✅)
         java.time.LocalDate today = java.time.LocalDate.now();
         var t1 = physics.getTopics().get(0);
         t1.setLastStudied(today.minusDays(2));
@@ -429,7 +427,6 @@ public class ForgeCli {
                 new com.forge.model.StudySession(today.minusDays(2), physics.getId(), t1.getId(), 50, "Sample: practice problems")
         );
 
-        // deadlines
         data.getDeadlines().add(new com.forge.model.Deadline(
                 com.forge.model.Deadline.Type.QUIZ, calculus.getId(), "Quiz 1",
                 today.plusDays(3), 10.0

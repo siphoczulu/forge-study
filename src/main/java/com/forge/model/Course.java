@@ -10,7 +10,6 @@ public class Course {
     private final List<Topic> topics = new ArrayList<>();
 
     public Course() {
-        // for JSON later
     }
 
     public Course(String name) {

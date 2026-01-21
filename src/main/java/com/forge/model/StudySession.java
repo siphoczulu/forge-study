@@ -12,7 +12,6 @@ public class StudySession {
     private String notes;
 
     public StudySession() {
-        // for JSON later
     }
 
     public StudySession(LocalDate date, String courseId, String topicId, int durationMinutes, String notes) {

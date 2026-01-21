@@ -14,7 +14,6 @@ public class Deadline {
     private Double weight; // nullable
 
     public Deadline() {
-        // for JSON later
     }
 
     public Deadline(Type type, String courseId, String title, LocalDate dueDate, Double weight) {

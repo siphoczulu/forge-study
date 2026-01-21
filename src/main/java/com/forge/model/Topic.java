@@ -9,7 +9,6 @@ public class Topic {
     private LocalDate lastStudied; // null = never studied
 
     public Topic() {
-        // for JSON later
     }
 
     public Topic(String name) {
