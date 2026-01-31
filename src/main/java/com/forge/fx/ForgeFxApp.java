@@ -1,9 +1,6 @@
 package com.forge.fx;
 
 import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 public class ForgeFxApp extends Application {
@@ -19,33 +16,15 @@ public class ForgeFxApp extends Application {
         var today = dashboard.buildTodayPlan(data);
         var weekly = dashboard.buildWeeklyStatus(data);
 
-        StringBuilder text = new StringBuilder();
-        text.append("FORGE DASHBOARD\n\n");
+        var todayList = new javafx.scene.control.ListView<String>();
 
-        text.append("What to study today:\n");
         if (today.isEmpty()) {
-            text.append("  (no data)\n");
+            todayList.getItems().add("(no data)");
         } else {
             for (var item : today) {
-                text.append("  • ")
-                        .append(item.courseName())
-                        .append(" → ")
-                        .append(item.topicName())
-                        .append(" (last: ")
-                        .append(item.lastStudied())
-                        .append(")\n");
-            }
-        }
-
-        text.append("\nWeekly target:\n");
-        if (weekly.isEmpty()) {
-            text.append("  (no courses)\n");
-        } else {
-            for (var w : weekly) {
-                text.append("  ")
-                        .append(w.studiedThisWeek() ? "✅ " : "❌ ")
-                        .append(w.courseName())
-                        .append("\n");
+                todayList.getItems().add(
+                        item.courseName() + " → " + item.topicName() + " (last: " + item.lastStudied() + ")"
+                );
             }
         }
 
@@ -54,14 +33,6 @@ public class ForgeFxApp extends Application {
 
         var todayLabel = new javafx.scene.control.Label("What to study today");
         todayLabel.setStyle("-fx-font-size: 14; -fx-font-weight: bold;");
-
-        var todayText = new javafx.scene.control.Label(
-                today.isEmpty() ? "(no data)" :
-                        today.stream()
-                                .map(i -> "• " + i.courseName() + " → " + i.topicName())
-                                .reduce("", (a, b) -> a + b + "\n")
-        );
-        todayText.setStyle("-fx-font-family: monospace;");
 
         var weeklyLabel = new javafx.scene.control.Label("Weekly target");
         weeklyLabel.setStyle("-fx-font-size: 14; -fx-font-weight: bold;");
@@ -78,7 +49,7 @@ public class ForgeFxApp extends Application {
                 12,
                 title,
                 todayLabel,
-                todayText,
+                todayList,
                 weeklyLabel,
                 weeklyText
         );
