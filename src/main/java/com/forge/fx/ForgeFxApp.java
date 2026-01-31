@@ -37,13 +37,15 @@ public class ForgeFxApp extends Application {
         var weeklyLabel = new javafx.scene.control.Label("Weekly target");
         weeklyLabel.setStyle("-fx-font-size: 14; -fx-font-weight: bold;");
 
-        var weeklyText = new javafx.scene.control.Label(
-                weekly.isEmpty() ? "(no courses)" :
-                        weekly.stream()
-                                .map(w -> (w.studiedThisWeek() ? "✅ " : "❌ ") + w.courseName())
-                                .reduce("", (a, b) -> a + b + "\n")
-        );
-        weeklyText.setStyle("-fx-font-family: monospace;");
+        var weeklyList = new javafx.scene.control.ListView<String>();
+
+        if (weekly.isEmpty()) {
+            weeklyList.getItems().add("(no courses)");
+        } else {
+            for (var w : weekly) {
+                weeklyList.getItems().add((w.studiedThisWeek() ? "✅ " : "❌ ") + w.courseName());
+            }
+        }
 
         var root = new javafx.scene.layout.VBox(
                 12,
@@ -51,7 +53,7 @@ public class ForgeFxApp extends Application {
                 todayLabel,
                 todayList,
                 weeklyLabel,
-                weeklyText
+                weeklyList
         );
         root.setStyle("-fx-padding: 16;");
 
