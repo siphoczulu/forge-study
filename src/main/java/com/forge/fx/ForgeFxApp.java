@@ -5,6 +5,14 @@ import javafx.stage.Stage;
 
 public class ForgeFxApp extends Application {
 
+    public record DeadlineRow(
+            String dueDate,
+            String course,
+            String type,
+            String title,
+            String weight
+    ) {}
+
     @Override
     public void start(Stage stage) {
         // Load data
@@ -39,11 +47,64 @@ public class ForgeFxApp extends Application {
 
         var weeklyList = new javafx.scene.control.ListView<String>();
 
+        var deadlinesLabel = new javafx.scene.control.Label("Upcoming deadlines (next 14 days)");
+        deadlinesLabel.setStyle("-fx-font-size: 14; -fx-font-weight: bold;");
+
         if (weekly.isEmpty()) {
             weeklyList.getItems().add("(no courses)");
         } else {
             for (var w : weekly) {
                 weeklyList.getItems().add((w.studiedThisWeek() ? "✅ " : "❌ ") + w.courseName());
+            }
+        }
+
+        // --- Upcoming deadlines table (next 14 days) ---
+        var courseNameById = new java.util.HashMap<String, String>();
+        for (var c : data.getCourses()) {
+            courseNameById.put(c.getId(), c.getName());
+        }
+
+        var todayDate = java.time.LocalDate.now();
+        var cutoff = todayDate.plusDays(14);
+
+        var deadlineTable = new javafx.scene.control.TableView<DeadlineRow>();
+
+        var colDue = new javafx.scene.control.TableColumn<DeadlineRow, String>("Due");
+        colDue.setCellValueFactory(cell -> new javafx.beans.property.SimpleStringProperty(cell.getValue().dueDate()));
+
+        var colCourse = new javafx.scene.control.TableColumn<DeadlineRow, String>("Course");
+        colCourse.setCellValueFactory(cell -> new javafx.beans.property.SimpleStringProperty(cell.getValue().course()));
+
+        var colType = new javafx.scene.control.TableColumn<DeadlineRow, String>("Type");
+        colType.setCellValueFactory(cell -> new javafx.beans.property.SimpleStringProperty(cell.getValue().type()));
+
+        var colTitle = new javafx.scene.control.TableColumn<DeadlineRow, String>("Title");
+        colTitle.setCellValueFactory(cell -> new javafx.beans.property.SimpleStringProperty(cell.getValue().title()));
+
+        var colWeight = new javafx.scene.control.TableColumn<DeadlineRow, String>("Weight");
+        colWeight.setCellValueFactory(cell -> new javafx.beans.property.SimpleStringProperty(cell.getValue().weight()));
+
+        deadlineTable.getColumns().addAll(colDue, colCourse, colType, colTitle, colWeight);
+        deadlineTable.setColumnResizePolicy(javafx.scene.control.TableView.CONSTRAINED_RESIZE_POLICY);
+
+        var upcoming = data.getDeadlines().stream()
+                .filter(d -> !d.getDueDate().isBefore(todayDate) && !d.getDueDate().isAfter(cutoff))
+                .sorted(java.util.Comparator.comparing(com.forge.model.Deadline::getDueDate))
+                .toList();
+
+        if (upcoming.isEmpty()) {
+            deadlineTable.getItems().add(new DeadlineRow("-", "-", "-", "No deadlines in next 14 days", "-"));
+        } else {
+            for (var d : upcoming) {
+                String courseName = courseNameById.getOrDefault(d.getCourseId(), "(unknown)");
+                String weight = (d.getWeight() == null) ? "-" : d.getWeight().toString();
+                deadlineTable.getItems().add(new DeadlineRow(
+                        d.getDueDate().toString(),
+                        courseName,
+                        d.getType().toString(),
+                        d.getTitle(),
+                        weight
+                ));
             }
         }
 
@@ -53,7 +114,9 @@ public class ForgeFxApp extends Application {
                 todayLabel,
                 todayList,
                 weeklyLabel,
-                weeklyList
+                weeklyList,
+                deadlinesLabel,
+                deadlineTable
         );
         root.setStyle("-fx-padding: 16;");
 
