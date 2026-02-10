@@ -22,9 +22,9 @@ public class ForgeFxApp extends Application {
         var today = dashboard.buildTodayPlan(data);
         var weekly = dashboard.buildWeeklyStatus(data);
 
-        var root = new com.forge.fx.view.DashboardView().build(data, today, weekly);
+        var root = new com.forge.fx.view.AppShell().build(data, today, weekly);
 
-        var scene = new javafx.scene.Scene(root, 640, 480);
+        var scene = new javafx.scene.Scene(root, 800, 600);
         stage.setTitle("Forge");
         stage.setScene(scene);
         stage.show();
