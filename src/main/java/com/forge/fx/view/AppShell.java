@@ -31,7 +31,7 @@ public class AppShell {
 
         // Center views
         Parent dashboardView = new DashboardView().build(data, today, weekly);
-        Parent coursesPlaceholder = new StackPane(new Label("Courses (coming next)"));
+        Parent coursesView = new CoursesView().build(data);
         Parent deadlinesPlaceholder = new StackPane(new Label("Deadlines (coming next)"));
 
         // Default view
@@ -39,7 +39,7 @@ public class AppShell {
 
         // Nav actions
         dashboardBtn.setOnAction(e -> root.setCenter(dashboardView));
-        coursesBtn.setOnAction(e -> root.setCenter(coursesPlaceholder));
+        coursesBtn.setOnAction(e -> root.setCenter(coursesView));
         deadlinesBtn.setOnAction(e -> root.setCenter(deadlinesPlaceholder));
 
         return root;
