@@ -11,6 +11,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.control.Button;
 
 public class CoursesView {
 
@@ -68,8 +69,18 @@ public class CoursesView {
         var right = new VBox(8, topicsTitle, topicsTable);
         right.setStyle("-fx-padding: 10;");
 
+        var addCourseBtn = new Button("Add Course (temp)");
+
+        addCourseBtn.setOnAction(e -> {
+            var newCourse = new Course("New Course");
+            data.getCourses().add(newCourse);
+            coursesList.getItems().add(newCourse);
+        });
+
         var root = new BorderPane();
-        root.setLeft(coursesList);
+        var leftBox = new VBox(8, addCourseBtn, coursesList);
+        leftBox.setStyle("-fx-padding: 10;");
+        root.setLeft(leftBox);
         root.setCenter(right);
         root.setStyle("-fx-padding: 10;");
 
