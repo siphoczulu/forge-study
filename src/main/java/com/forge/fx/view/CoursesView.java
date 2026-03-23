@@ -12,6 +12,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextInputDialog;
 
 public class CoursesView {
 
@@ -72,9 +73,23 @@ public class CoursesView {
         var addCourseBtn = new Button("Add Course (temp)");
 
         addCourseBtn.setOnAction(e -> {
-            var newCourse = new Course("New Course");
-            data.getCourses().add(newCourse);
-            coursesList.getItems().add(newCourse);
+            var dialog = new TextInputDialog();
+            dialog.setTitle("Add Course");
+            dialog.setHeaderText("Create a new course");
+            dialog.setContentText("Course name:");
+
+            var result = dialog.showAndWait();
+
+            result.ifPresent(name -> {
+                if (!name.trim().isEmpty()) {
+                    var newCourse = new Course(name.trim());
+                    data.getCourses().add(newCourse);
+                    coursesList.getItems().add(newCourse);
+
+                    // 🔥 Save immediately
+                    new com.forge.storage.JsonStore("forge_data.json").save(data);
+                }
+            });
         });
 
         var root = new BorderPane();
