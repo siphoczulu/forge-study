@@ -70,7 +70,8 @@ public class CoursesView {
         var right = new VBox(8, topicsTitle, topicsTable);
         right.setStyle("-fx-padding: 10;");
 
-        var addCourseBtn = new Button("Add Course (temp)");
+        var addCourseBtn = new Button("Add Course");
+        var deleteCourseBtn = new Button("Delete Selected");
 
         addCourseBtn.setOnAction(e -> {
             var dialog = new TextInputDialog();
@@ -91,9 +92,27 @@ public class CoursesView {
                 }
             });
         });
+        deleteCourseBtn.setOnAction(e -> {
+            var selected = coursesList.getSelectionModel().getSelectedItem();
+            if (selected == null) {
+                return;
+            }
+
+            data.getCourses().remove(selected);
+            coursesList.getItems().remove(selected);
+
+            if (data.getCourses().isEmpty()) {
+                topicsTitle.setText("Topics");
+                topicsTable.getItems().clear();
+            } else {
+                coursesList.getSelectionModel().selectFirst();
+            }
+
+            new com.forge.storage.JsonStore("forge_data.json").save(data);
+        });
 
         var root = new BorderPane();
-        var leftBox = new VBox(8, addCourseBtn, coursesList);
+        var leftBox = new VBox(8, addCourseBtn, deleteCourseBtn, coursesList);
         leftBox.setStyle("-fx-padding: 10;");
         root.setLeft(leftBox);
         root.setCenter(right);
