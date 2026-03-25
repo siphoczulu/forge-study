@@ -13,6 +13,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.TextInputDialog;
 
 public class CoursesView {
 
@@ -72,6 +73,8 @@ public class CoursesView {
 
         var addCourseBtn = new Button("Add Course");
         var deleteCourseBtn = new Button("Delete Selected");
+        var addTopicBtn = new Button("Add Topic");
+        var deleteTopicBtn = new Button("Delete Topic");
 
         addCourseBtn.setOnAction(e -> {
             var dialog = new TextInputDialog();
@@ -110,9 +113,46 @@ public class CoursesView {
 
             new com.forge.storage.JsonStore("forge_data.json").save(data);
         });
+        addTopicBtn.setOnAction(e -> {
+            var selectedCourse = coursesList.getSelectionModel().getSelectedItem();
+            if (selectedCourse == null) {
+                return;
+            }
+
+            var dialog = new TextInputDialog();
+            dialog.setTitle("Add Topic");
+            dialog.setHeaderText("Add topic to " + selectedCourse.getName());
+            dialog.setContentText("Topic name:");
+
+            var result = dialog.showAndWait();
+
+            result.ifPresent(name -> {
+                if (!name.trim().isEmpty()) {
+                    var newTopic = new Topic(name.trim());
+                    selectedCourse.addTopic(newTopic);
+
+                    topicsTable.getItems().setAll(selectedCourse.getTopics());
+
+                    new com.forge.storage.JsonStore("forge_data.json").save(data);
+                }
+            });
+        });
+        deleteTopicBtn.setOnAction(e -> {
+            var selectedCourse = coursesList.getSelectionModel().getSelectedItem();
+            var selectedTopic = topicsTable.getSelectionModel().getSelectedItem();
+
+            if (selectedCourse == null || selectedTopic == null) {
+                return;
+            }
+
+            selectedCourse.getTopics().remove(selectedTopic);
+            topicsTable.getItems().setAll(selectedCourse.getTopics());
+
+            new com.forge.storage.JsonStore("forge_data.json").save(data);
+        });
 
         var root = new BorderPane();
-        var leftBox = new VBox(8, addCourseBtn, deleteCourseBtn, coursesList);
+        var leftBox = new VBox(8, addCourseBtn, deleteCourseBtn, addTopicBtn, deleteTopicBtn, coursesList);
         leftBox.setStyle("-fx-padding: 10;");
         root.setLeft(leftBox);
         root.setCenter(right);
