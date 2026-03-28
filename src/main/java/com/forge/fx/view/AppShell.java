@@ -2,6 +2,7 @@ package com.forge.fx.view;
 
 import com.forge.core.dto.TodayPlanItem;
 import com.forge.core.dto.WeeklyStatusItem;
+import com.forge.core.service.DashboardService;
 import com.forge.storage.ForgeData;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
@@ -16,6 +17,13 @@ public class AppShell {
 
     private final BorderPane root = new BorderPane();
 
+    private Parent buildFreshDashboard(ForgeData data) {
+        var dashboardService = new DashboardService();
+        var today = dashboardService.buildTodayPlan(data);
+        var weekly = dashboardService.buildWeeklyStatus(data);
+        return new DashboardView().build(data, today, weekly);
+    }
+
     public Parent build(ForgeData data,
                         List<TodayPlanItem> today,
                         List<WeeklyStatusItem> weekly) {
@@ -29,16 +37,15 @@ public class AppShell {
         nav.setStyle("-fx-padding: 10; -fx-background-color: #f3f3f3;");
         root.setTop(nav);
 
-        // Center views
-        Parent dashboardView = new DashboardView().build(data, today, weekly);
+        // Other views
         Parent coursesView = new CoursesView().build(data);
         Parent deadlinesPlaceholder = new StackPane(new Label("Deadlines (coming next)"));
 
         // Default view
-        root.setCenter(dashboardView);
+        root.setCenter(buildFreshDashboard(data));
 
         // Nav actions
-        dashboardBtn.setOnAction(e -> root.setCenter(dashboardView));
+        dashboardBtn.setOnAction(e -> root.setCenter(buildFreshDashboard(data)));
         coursesBtn.setOnAction(e -> root.setCenter(coursesView));
         deadlinesBtn.setOnAction(e -> root.setCenter(deadlinesPlaceholder));
 
