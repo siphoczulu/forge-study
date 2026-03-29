@@ -40,15 +40,14 @@ public class AppShell {
 
         // Other views
         Parent coursesView = new CoursesView().build(data);
-        Parent deadlinesPlaceholder = new StackPane(new Label("Deadlines (coming next)"));
-
+        Parent deadlinesView = new DeadlinesView().build(data);
         // Default view
         root.setCenter(buildFreshDashboard(data));
 
         // Nav actions
         dashboardBtn.setOnAction(e -> root.setCenter(buildFreshDashboard(data)));
         coursesBtn.setOnAction(e -> root.setCenter(coursesView));
-        deadlinesBtn.setOnAction(e -> root.setCenter(deadlinesPlaceholder));
+        deadlinesBtn.setOnAction(e -> root.setCenter(new DeadlinesView().build(data)));
         logSessionBtn.setOnAction(e -> {
             boolean saved = LogSessionDialog.show(data);
             if (saved) {
