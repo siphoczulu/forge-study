@@ -50,11 +50,10 @@ public class AppShell {
         coursesBtn.setOnAction(e -> root.setCenter(coursesView));
         deadlinesBtn.setOnAction(e -> root.setCenter(deadlinesPlaceholder));
         logSessionBtn.setOnAction(e -> {
-            var placeholder = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
-            placeholder.setTitle("Log Session");
-            placeholder.setHeaderText("Next step");
-            placeholder.setContentText("This button will open the study session dialog next.");
-            placeholder.showAndWait();
+            boolean saved = LogSessionDialog.show(data);
+            if (saved) {
+                root.setCenter(buildFreshDashboard(data));
+            }
         });
 
         return root;
