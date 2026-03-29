@@ -32,8 +32,9 @@ public class AppShell {
         Button dashboardBtn = new Button("Dashboard");
         Button coursesBtn = new Button("Courses");
         Button deadlinesBtn = new Button("Deadlines");
+        Button logSessionBtn = new Button("Log Session");
 
-        HBox nav = new HBox(8, dashboardBtn, coursesBtn, deadlinesBtn);
+        HBox nav = new HBox(8, dashboardBtn, coursesBtn, deadlinesBtn, logSessionBtn);
         nav.setStyle("-fx-padding: 10; -fx-background-color: #f3f3f3;");
         root.setTop(nav);
 
@@ -48,6 +49,13 @@ public class AppShell {
         dashboardBtn.setOnAction(e -> root.setCenter(buildFreshDashboard(data)));
         coursesBtn.setOnAction(e -> root.setCenter(coursesView));
         deadlinesBtn.setOnAction(e -> root.setCenter(deadlinesPlaceholder));
+        logSessionBtn.setOnAction(e -> {
+            var placeholder = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+            placeholder.setTitle("Log Session");
+            placeholder.setHeaderText("Next step");
+            placeholder.setContentText("This button will open the study session dialog next.");
+            placeholder.showAndWait();
+        });
 
         return root;
     }
