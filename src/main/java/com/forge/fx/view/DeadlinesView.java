@@ -4,6 +4,7 @@ import com.forge.model.Deadline;
 import com.forge.storage.ForgeData;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -16,6 +17,8 @@ public class DeadlinesView {
     public Parent build(ForgeData data) {
         var title = new Label("Deadlines");
         title.setStyle("-fx-font-size: 18; -fx-font-weight: bold;");
+
+        var addDeadlineBtn = new Button("Add Deadline");
 
         var table = new TableView<Deadline>();
 
@@ -52,13 +55,24 @@ public class DeadlinesView {
         table.getColumns().addAll(colDue, colCourse, colType, colTitle, colWeight);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        table.getItems().setAll(
-                data.getDeadlines().stream()
-                        .sorted(java.util.Comparator.comparing(Deadline::getDueDate))
-                        .toList()
-        );
+        Runnable refreshTable = () -> {
+            table.getItems().setAll(
+                    data.getDeadlines().stream()
+                            .sorted(java.util.Comparator.comparing(Deadline::getDueDate))
+                            .toList()
+            );
+        };
 
-        var root = new VBox(10, title, table);
+        refreshTable.run();
+
+        addDeadlineBtn.setOnAction(e -> {
+            boolean saved = AddDeadlineDialog.show(data);
+            if (saved) {
+                refreshTable.run();
+            }
+        });
+
+        var root = new VBox(10, title, addDeadlineBtn, table);
         root.setStyle("-fx-padding: 16;");
         return root;
     }
