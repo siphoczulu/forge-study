@@ -19,6 +19,7 @@ public class DeadlinesView {
         title.setStyle("-fx-font-size: 18; -fx-font-weight: bold;");
 
         var addDeadlineBtn = new Button("Add Deadline");
+        var deleteDeadlineBtn = new Button("Delete Selected");
 
         var table = new TableView<Deadline>();
 
@@ -72,7 +73,18 @@ public class DeadlinesView {
             }
         });
 
-        var root = new VBox(10, title, addDeadlineBtn, table);
+        deleteDeadlineBtn.setOnAction(e -> {
+            var selected = table.getSelectionModel().getSelectedItem();
+            if (selected == null) {
+                return;
+            }
+
+            data.getDeadlines().remove(selected);
+            new com.forge.storage.JsonStore("forge_data.json").save(data);
+            refreshTable.run();
+        });
+
+        var root = new VBox(10, title, addDeadlineBtn, deleteDeadlineBtn, table);
         root.setStyle("-fx-padding: 16;");
         return root;
     }
