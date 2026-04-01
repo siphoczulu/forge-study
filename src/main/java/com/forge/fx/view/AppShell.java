@@ -32,15 +32,17 @@ public class AppShell {
         Button dashboardBtn = new Button("Dashboard");
         Button coursesBtn = new Button("Courses");
         Button deadlinesBtn = new Button("Deadlines");
+        Button historyBtn = new Button("History");
         Button logSessionBtn = new Button("Log Session");
 
-        HBox nav = new HBox(8, dashboardBtn, coursesBtn, deadlinesBtn, logSessionBtn);
+        HBox nav = new HBox(8, dashboardBtn, coursesBtn, deadlinesBtn, historyBtn, logSessionBtn);
         nav.setStyle("-fx-padding: 10; -fx-background-color: #f3f3f3;");
         root.setTop(nav);
 
         // Other views
         Parent coursesView = new CoursesView().build(data);
         Parent deadlinesView = new DeadlinesView().build(data);
+        Parent historyView = new SessionHistoryView().build(data);
         // Default view
         root.setCenter(buildFreshDashboard(data));
 
@@ -48,6 +50,8 @@ public class AppShell {
         dashboardBtn.setOnAction(e -> root.setCenter(buildFreshDashboard(data)));
         coursesBtn.setOnAction(e -> root.setCenter(coursesView));
         deadlinesBtn.setOnAction(e -> root.setCenter(new DeadlinesView().build(data)));
+        historyBtn.setOnAction(e -> root.setCenter(new SessionHistoryView().build(data)));
+
         logSessionBtn.setOnAction(e -> {
             boolean saved = LogSessionDialog.show(data);
             if (saved) {
