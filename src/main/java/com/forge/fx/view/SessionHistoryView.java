@@ -6,20 +6,56 @@ import com.forge.model.Topic;
 import com.forge.storage.ForgeData;
 import com.forge.storage.JsonStore;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
 import javafx.scene.Parent;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 
 import java.util.HashMap;
+import java.util.List;
 
 public class SessionHistoryView {
 
     public Parent build(ForgeData data) {
         var title = new Label("Study Session History");
         title.setStyle("-fx-font-size: 18; -fx-font-weight: bold;");
+
+        var courseFilter = new ComboBox<Course>();
+        courseFilter.setPromptText("Filter by course");
+        courseFilter.setPrefWidth(240);
+
+        javafx.collections.ObservableList<Course> allCourses = FXCollections.observableArrayList();
+        allCourses.add(null); // represents "All courses"
+        allCourses.addAll(data.getCourses());
+        courseFilter.setItems(allCourses);
+
+        courseFilter.setCellFactory(lv -> new ListCell<>() {
+            @Override
+            protected void updateItem(Course item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setText("");
+                } else if (item == null) {
+                    setText("All courses");
+                } else {
+                    setText(item.getName());
+                }
+            }
+        });
+
+        courseFilter.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(Course item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setText("");
+                } else if (item == null) {
+                    setText("All courses");
+                } else {
+                    setText(item.getName());
+                }
+            }
+        });
 
         var deleteBtn = new Button("Delete Selected");
 
@@ -67,11 +103,18 @@ public class SessionHistoryView {
         table.getColumns().addAll(colDate, colCourse, colTopic, colMinutes, colNotes);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        Runnable refreshTable = () -> table.getItems().setAll(
-                data.getStudySessions().stream()
-                        .sorted(java.util.Comparator.comparing(StudySession::getDate).reversed())
-                        .toList()
-        );
+        Runnable refreshTable = () -> {
+            Course selectedCourse = courseFilter.getValue();
+
+            List<StudySession> sessions = data.getStudySessions().stream()
+                    .filter(s -> selectedCourse == null || s.getCourseId().equals(selectedCourse.getId()))
+                    .sorted(java.util.Comparator.comparing(StudySession::getDate).reversed())
+                    .toList();
+
+            table.getItems().setAll(sessions);
+        };
+
+        courseFilter.setOnAction(e -> refreshTable.run());
 
         refreshTable.run();
 
@@ -86,7 +129,7 @@ public class SessionHistoryView {
             refreshTable.run();
         });
 
-        var root = new VBox(10, title, deleteBtn, table);
+        var root = new VBox(10, title, courseFilter, deleteBtn, table);
         root.setStyle("-fx-padding: 16;");
         return root;
     }
