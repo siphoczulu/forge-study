@@ -4,8 +4,10 @@ import com.forge.model.Course;
 import com.forge.model.StudySession;
 import com.forge.model.Topic;
 import com.forge.storage.ForgeData;
+import com.forge.storage.JsonStore;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -18,6 +20,8 @@ public class SessionHistoryView {
     public Parent build(ForgeData data) {
         var title = new Label("Study Session History");
         title.setStyle("-fx-font-size: 18; -fx-font-weight: bold;");
+
+        var deleteBtn = new Button("Delete Selected");
 
         var table = new TableView<StudySession>();
 
@@ -63,13 +67,26 @@ public class SessionHistoryView {
         table.getColumns().addAll(colDate, colCourse, colTopic, colMinutes, colNotes);
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        table.getItems().setAll(
+        Runnable refreshTable = () -> table.getItems().setAll(
                 data.getStudySessions().stream()
                         .sorted(java.util.Comparator.comparing(StudySession::getDate).reversed())
                         .toList()
         );
 
-        var root = new VBox(10, title, table);
+        refreshTable.run();
+
+        deleteBtn.setOnAction(e -> {
+            var selected = table.getSelectionModel().getSelectedItem();
+            if (selected == null) {
+                return;
+            }
+
+            data.getStudySessions().remove(selected);
+            new JsonStore("forge_data.json").save(data);
+            refreshTable.run();
+        });
+
+        var root = new VBox(10, title, deleteBtn, table);
         root.setStyle("-fx-padding: 16;");
         return root;
     }
