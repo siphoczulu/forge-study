@@ -40,7 +40,6 @@ public class AppShell {
         root.setTop(nav);
 
         // Other views
-        Parent coursesView = new CoursesView().build(data);
         Parent deadlinesView = new DeadlinesView().build(data);
         Parent historyView = new SessionHistoryView().build(data);
         // Default view
@@ -48,7 +47,7 @@ public class AppShell {
 
         // Nav actions
         dashboardBtn.setOnAction(e -> root.setCenter(buildFreshDashboard(data)));
-        coursesBtn.setOnAction(e -> root.setCenter(coursesView));
+        coursesBtn.setOnAction(e -> root.setCenter(new CoursesView().build(data)));
         deadlinesBtn.setOnAction(e -> root.setCenter(new DeadlinesView().build(data)));
         historyBtn.setOnAction(e -> root.setCenter(new SessionHistoryView().build(data)));
 
