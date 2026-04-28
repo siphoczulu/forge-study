@@ -100,6 +100,17 @@ public class CoursesView {
                 return;
             }
 
+            // Remove related study sessions for this course
+            data.getStudySessions().removeIf(session ->
+                    session.getCourseId().equals(selected.getId())
+            );
+
+            // Remove related deadlines for this course
+            data.getDeadlines().removeIf(deadline ->
+                    deadline.getCourseId().equals(selected.getId())
+            );
+
+            // Remove the course itself
             data.getCourses().remove(selected);
             coursesList.getItems().remove(selected);
 
