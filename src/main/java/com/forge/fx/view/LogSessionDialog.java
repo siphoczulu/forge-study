@@ -132,7 +132,12 @@ public class LogSessionDialog {
         );
 
         data.getStudySessions().add(session);
-        selectedTopic.setLastStudied(selectedDate);
+
+// Keep lastStudied correct even if user logs an older/backdated session
+        var currentLast = selectedTopic.getLastStudied();
+        if (currentLast == null || selectedDate.isAfter(currentLast)) {
+            selectedTopic.setLastStudied(selectedDate);
+        }
 
         new JsonStore("forge_data.json").save(data);
         return true;
