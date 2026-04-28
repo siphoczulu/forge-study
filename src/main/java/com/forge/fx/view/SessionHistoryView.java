@@ -11,6 +11,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 
@@ -125,6 +126,7 @@ public class SessionHistoryView {
             }
 
             data.getStudySessions().remove(selected);
+            recalculateTopicLastStudied(data, selected.getTopicId());
             new JsonStore("forge_data.json").save(data);
             refreshTable.run();
         });
@@ -132,5 +134,22 @@ public class SessionHistoryView {
         var root = new VBox(10, title, courseFilter, deleteBtn, table);
         root.setStyle("-fx-padding: 16;");
         return root;
+    }
+
+    private void recalculateTopicLastStudied(ForgeData data, String topicId) {
+        LocalDate latest = data.getStudySessions().stream()
+                .filter(s -> s.getTopicId().equals(topicId))
+                .map(StudySession::getDate)
+                .max(LocalDate::compareTo)
+                .orElse(null);
+
+        for (Course course : data.getCourses()) {
+            for (Topic topic : course.getTopics()) {
+                if (topic.getId().equals(topicId)) {
+                    topic.setLastStudied(latest);
+                    return;
+                }
+            }
+        }
     }
 }
